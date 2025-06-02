@@ -1,0 +1,23 @@
+.theme {
+  transition: all 0.3s ease;
+  
+  &.light {
+    background-color: #f5f5f5;
+    color: #333;
+  }
+  
+  &.dark {
+    background-color: #1a1a1a;
+    color: #f5f5f5;
+    
+    .left, .right {
+      background-color: #2d2d2d;
+      border-color: #444;
+    }
+    
+    .item {
+      background-color: #333;
+      color: #f5f5f5;
+    }
+  }
+}

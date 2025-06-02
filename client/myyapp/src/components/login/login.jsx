@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useContext } from "react";
 import { motion } from "framer-motion";
 import img1 from '../../assets/one.jpg';
 import { Link } from "react-router-dom";
+import { auth } from "../../Auth";
 
 const Login = () => {
+    const {login}=useContext(auth);
+    const handleLogin=()=>{
+        login();
+    }
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
             <motion.div
@@ -115,6 +120,7 @@ const Login = () => {
                                 }}
                                 whileTap={{ scale: 0.98 }}
                                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:shadow-md transition-all duration-300"
+                                onClick={handleLogin}
                             >
                                 Login
                             </motion.button>
