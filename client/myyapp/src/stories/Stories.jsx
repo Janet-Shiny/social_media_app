@@ -27,7 +27,7 @@ const Stories = () => {
         <div className="flex flex-col items-center space-y-1 flex-shrink-0">
           <div className={`relative h-16 w-16 rounded-full p-0.5 ${darkTheme ? 'bg-gray-700' : 'bg-gray-100'}`}>
             <img
-              src={curruser.profile}
+              src={curruser.profile_pic}
               alt="Your story"
               className="h-full w-full rounded-full object-cover border-2 border-white"
             />

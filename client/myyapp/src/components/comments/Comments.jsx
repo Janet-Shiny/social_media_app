@@ -55,7 +55,7 @@ const Comments = () => {
         ${darkTheme ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
 
         <img
-          src={curruser?.profile}
+          src={curruser?.profile_pic}
           alt="User"
           className="w-10 h-10 rounded-full object-cover"
         />
@@ -86,7 +86,7 @@ const Comments = () => {
             ${darkTheme ? 'bg-gray-700 text-gray-100' : 'bg-white text-gray-900'}`}
         >
           <img
-            src={comment.profile}
+            src={comment.profile_pic}
             alt={comment.name}
             className="w-10 h-10 rounded-full object-cover mr-3"
           />

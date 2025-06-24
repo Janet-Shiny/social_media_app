@@ -102,7 +102,7 @@ const Navbar = () => {
             <>
             <Link to='../profile/profile'>
               <img 
-                src={curruser.profile} 
+                src={curruser.profile_pic} 
                 alt="profile" 
                 className="w-7 h-7 rounded-full object-cover"
               /></Link>

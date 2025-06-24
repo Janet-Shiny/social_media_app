@@ -7,12 +7,15 @@ import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import { Link } from 'react-router-dom';
 import Comments from '../components/comments/Comments';
 import { ThemeContext } from '../App';
+import { auth } from '../Auth';
 
 const Post = ({ post }) => {
   const [liked, setLiked] = useState(false);
   const [comm, setComm] = useState(false);
   const [likeCount, setLikeCount] = useState(12);
   const { darkTheme } = useContext(ThemeContext);
+      const { curruser } = useContext(auth);
+  
 
   const handleLike = () => {
     setLikeCount(prev => liked ? prev - 1 : prev + 1);
@@ -27,15 +30,15 @@ const Post = ({ post }) => {
       <div className="flex justify-between items-start mb-3">
         <div className="flex items-center">
           <img
-            src={post.profile}
+            src={post.profile_pic}
             alt="profile"
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
           />
           <div className="ml-3">
             <p className="font-semibold text-sm sm:text-base">{post.name}</p>
             <p className={`text-xs sm:text-sm ${darkTheme ? 'text-gray-400' : 'text-gray-500'}`}>
-              <Link to={`./Post/${post.userId}`}>
-                <span>@{post.userId}</span>
+              <Link to={`./Post/${post.userid}`}>
+                <span>@ user_id -{post.userid} | Date created -{post.created_at.slice(0,10)}</span>
               </Link>
             </p>
           </div>
@@ -51,9 +54,9 @@ const Post = ({ post }) => {
       </p>
 
       {/* Post Image - Responsive sizing */}
-      {post.postImage && (
+      {post.img && (
         <img
-          src={post.postImage}
+          src={"/upload/"+post.img}
           alt="post"
           className="w-full h-auto max-h-96 sm:max-h-[500px] object-cover rounded-lg mb-3"
         />

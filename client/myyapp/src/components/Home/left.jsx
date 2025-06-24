@@ -28,7 +28,7 @@ const Left = () => {
                 {/* Friends Section */}
                 <div className="space-y-2">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Friends</h3>
-                    <Link to='../profile/profile'><SidebarItem icon={curruser.profile} text={curruser.name} darkTheme={darkTheme} isImage={true} /></Link>
+                    <Link to='../profile/profile'><SidebarItem icon={curruser.profile_pic} text={curruser.name} darkTheme={darkTheme} isImage={true} /></Link>
                     <SidebarItem icon={<PersonAddOutlinedIcon />} text="Friends" darkTheme={darkTheme} />
                     <SidebarItem icon={<Diversity3OutlinedIcon />} text="Groups" darkTheme={darkTheme} />
                 </div>
