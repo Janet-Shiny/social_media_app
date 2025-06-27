@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined';
 import Diversity3OutlinedIcon from '@mui/icons-material/Diversity3Outlined';
@@ -10,13 +10,35 @@ import VideogameAssetOutlinedIcon from '@mui/icons-material/VideogameAssetOutlin
 import PhotoCameraBackOutlinedIcon from '@mui/icons-material/PhotoCameraBackOutlined';
 import VideoCameraFrontOutlinedIcon from '@mui/icons-material/VideoCameraFrontOutlined';
 import LocalPostOfficeOutlinedIcon from '@mui/icons-material/LocalPostOfficeOutlined';
+import PeopleIcon from '@mui/icons-material/People';
 import { ThemeContext } from '../../App';
 import { auth } from '../../Auth';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { makereq } from '../../axios';
+import { useQuery } from '@tanstack/react-query';
 
 const Left = () => {
     const { darkTheme } = useContext(ThemeContext);
     const { curruser } = useContext(auth);
+    const navigate = useNavigate();
+
+    // Fetch followed users
+    const { data: followedUsers = [] } = useQuery({
+        queryKey: ['followedUsers', curruser?.id],
+        queryFn: async () => {
+            const res = await makereq.get(`/relationships?follower_userid=${curruser.id}`);
+            // Get user details for followed users
+            const userPromises = res.data.map(userId => 
+                makereq.get(`/users/find/${userId}`).then(response => response.data)
+            );
+            return Promise.all(userPromises);
+        },
+        enabled: !!curruser?.id,
+    });
+
+    const handleNavigateToProfile = (userId) => {
+        navigate(`/profile/${userId}`);
+    };
 
     return (
         <div 
@@ -25,11 +47,44 @@ const Left = () => {
             } border-r fixed left-0 top-14 h-[calc(100vh-56px)] overflow-y-auto scrollbar-hide`}
         >
             <div className="flex flex-col space-y-6 mt-4">
+                {/* Profile Section */}
+                <div className="space-y-2">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Profile</h3>
+                    <div 
+                        onClick={() => handleNavigateToProfile(curruser.id)}
+                        className="cursor-pointer"
+                    >
+                        <SidebarItem 
+                            icon={curruser?.profile_pic || '/default-profile.png'} 
+                            text={curruser?.username || 'My Profile'} 
+                            darkTheme={darkTheme} 
+                            isImage={true} 
+                        />
+                    </div>
+                </div>
+
                 {/* Friends Section */}
                 <div className="space-y-2">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Friends</h3>
-                    <Link to='../profile/profile'><SidebarItem icon={curruser.profile_pic} text={curruser.name} darkTheme={darkTheme} isImage={true} /></Link>
-                    <SidebarItem icon={<PersonAddOutlinedIcon />} text="Friends" darkTheme={darkTheme} />
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Following</h3>
+                    {followedUsers.length > 0 ? (
+                        followedUsers.slice(0, 5).map((user) => (
+                            <div 
+                                key={user.id}
+                                onClick={() => handleNavigateToProfile(user.id)}
+                                className="cursor-pointer"
+                            >
+                                <SidebarItem 
+                                    icon={user.profile_pic || '/default-profile.png'} 
+                                    text={user.username} 
+                                    darkTheme={darkTheme} 
+                                    isImage={true} 
+                                />
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-sm text-gray-500">No friends yet</p>
+                    )}
+                    <SidebarItem icon={<PersonAddOutlinedIcon />} text="Find Friends" darkTheme={darkTheme} />
                     <SidebarItem icon={<Diversity3OutlinedIcon />} text="Groups" darkTheme={darkTheme} />
                 </div>
 
