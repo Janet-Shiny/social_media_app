@@ -4,6 +4,7 @@ import path from 'path';
 import multer from 'multer';
 const app=express()
 import userRoutes from './Routes/users.js'
+import relationshipRoutes from './Routes/relationships.js'
 import authRoutes from './Routes/auth.js'
 import postRoutes from './Routes/posts.js'
 import likeRoutes from './Routes/likes.js'
@@ -50,6 +51,7 @@ app.use("/api/auth",authRoutes)
 app.use("/api/posts",postRoutes)
 app.use("/api/likes",likeRoutes)
 app.use("/api/comments",commentRoutes)
+app.use("/api/relationships",relationshipRoutes)
 app.listen(8800,()=>{
     console.log("Api ");
 })

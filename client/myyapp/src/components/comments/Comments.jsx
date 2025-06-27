@@ -1,49 +1,36 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { ThemeContext } from '../../App';
 import { auth } from '../../Auth';
+import { useQuery,useMutation,useQueryClient } from '@tanstack/react-query';
+import { makereq } from '../../axios.js';
 
-const Comments = () => {
+const Comments = ({postid}) => {
   const { darkTheme } = useContext(ThemeContext);
   const { curruser } = useContext(auth);
+   const queryClient = useQueryClient();
+const [desc,setdesc]=useState("");
+  const { isLoading, error, data } = useQuery({
+    queryKey: ['comments'],
+    queryFn: () =>
+      makereq.get('/comments?postid='+postid).then(res => res.data),
+    retry: 2,
+  });
 
-  const DummyComments = [
-    {
-      id: 1,
-      desc: "Absolutely love this shot! The colors are amazing 🔥",
-      name: "Nikita Sharma",
-      userId: "nikki_snapz",
-      profile: "https://randomuser.me/api/portraits/women/65.jpg"
-    },
-    {
-      id: 2,
-      desc: "Wow, Mumbai looks beautiful at night. Great click!",
-      name: "Ravi Patel",
-      userId: "ravi_travels",
-      profile: "https://randomuser.me/api/portraits/men/33.jpg"
-    },
-    {
-      id: 3,
-      desc: "This reminds me of my last trip. Thanks for the nostalgia! 😊",
-      name: "Sana Khan",
-      userId: "sana_journeys",
-      profile: "https://randomuser.me/api/portraits/women/52.jpg"
-    },
-    {
-      id: 4,
-      desc: "Captured so well — definitely worth a wallpaper!",
-      name: "Devansh Roy",
-      userId: "dev.codes",
-      profile: "https://randomuser.me/api/portraits/men/41.jpg"
-    },
-    {
-      id: 5,
-      desc: "This photo has such a calming vibe. Great work!",
-      name: "Ayesha Naik",
-      userId: "ayesha.naik",
-      profile: "https://randomuser.me/api/portraits/women/28.jpg"
+    const mutation = useMutation({
+        mutationFn: (newComment) => makereq.post("/comments", newComment),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['comments'] });
+
+        },
+    });
+
+    const handleClick= async (e)=>{
+      e.preventDefault();
+        if (!desc.trim()) return;
+      mutation.mutate({desc,postid})
+      setdesc("");
     }
-  ];
-
+  
   return (
     <div className={`mt-4 p-4 flex flex-col transition-all 
       ${darkTheme ? 'text-gray-100' : 'text-gray-800'}`}>
@@ -64,6 +51,8 @@ const Comments = () => {
           <input
             type="text"
             placeholder="Write a comment..."
+            value={desc}
+            onChange={e=>setdesc(e.target.value)}
             className={`w-full rounded-lg px-4 py-2 border outline-none text-sm
               ${darkTheme 
                 ? 'bg-gray-700 text-white border-gray-600 placeholder-gray-400' 
@@ -73,13 +62,14 @@ const Comments = () => {
 
         <button className="px-4 py-2 text-sm rounded-lg font-semibold shadow-sm 
           transition hover:scale-105 active:scale-95
-          bg-blue-500 text-white hover:bg-blue-600">
+          bg-blue-500 text-white hover:bg-blue-600"
+          onClick={handleClick}>
           Send
         </button>
       </div>
 
       {/* Render All Comments */}
-      {DummyComments.map((comment) => (
+      {isLoading?"Loading....":data.map((comment) => (
         <div
           key={comment.id}
           className={`flex mb-4 rounded-xl shadow-md p-5 transition-colors
@@ -87,14 +77,14 @@ const Comments = () => {
         >
           <img
             src={comment.profile_pic}
-            alt={comment.name}
+            alt={comment.username}
             className="w-10 h-10 rounded-full object-cover mr-3"
           />
           <div>
             <p className="font-medium">
               {comment.name}{" "}
               <span className={`text-sm ${darkTheme ? 'text-gray-400' : 'text-gray-500'}`}>
-                @{comment.userId}
+                @{comment.username}
               </span>
             </p>
             <p className={`text-sm ${darkTheme ? 'text-gray-300' : 'text-gray-700'}`}>

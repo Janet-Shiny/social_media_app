@@ -3,18 +3,26 @@ import jwt from "jsonwebtoken";
 import moment from 'moment/moment.js';
 
 export const getpost = (req, res) => {
+  const userid=req.query.userid;
   const token = req.cookies.accesstoken; 
   console.log(token, "token received");
   if (!token) return res.status(401).json("not logged in");
   jwt.verify(token, "secretkey", (err, userInfo) => {
     if (err) return res.status(403).json("Token is not valid");
-    const q =`
-      SELECT p.*, u.id as userid, username, profile_pic
+    const q =userid?`SELECT DISTINCT p.id, p.desc, p.img, p.created_at, u.id as userid, u.username, u.profile_pic
+      FROM posts AS p
+      JOIN users AS u ON (u.id = p.userid) where p.userid=?`:`
+      SELECT DISTINCT p.id, p.desc, p.img, p.created_at, u.id as userid, u.username, u.profile_pic
       FROM posts AS p
       JOIN users AS u ON (u.id = p.userid)
-      LEFT JOIN relationships AS r ON (p.userid = r.followed_userid)
-      WHERE r.follower_userid = ? OR p.userid = ? order by p.created_at desc `;
-    db.query(q, [userInfo.id, userInfo.id], (err, data) => {
+      WHERE p.userid IN (
+        SELECT DISTINCT followed_userid FROM relationships WHERE follower_userid = ?
+        UNION
+        SELECT ?
+      )
+      ORDER BY p.created_at DESC`;
+      const values= userid ? [userid] :[userInfo.id, userInfo.id];
+    db.query(q,values, (err, data) => {
       if (err) {
         console.error("Database query error:", err);
         return res.status(500).json(err);
