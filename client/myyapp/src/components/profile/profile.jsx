@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   Facebook as FacebookIcon,
   LinkedIn as LinkedInIcon,
@@ -15,8 +15,10 @@ import { auth } from '../../Auth';
 import { useQuery,useQueryClient,useMutation} from '@tanstack/react-query';
 import { makereq } from '../../axios';
 import { useLocation } from 'react-router-dom';
+import Update from '../Update/Update';
 
 const Profile = () => {
+  const [openupdate,setopenupdate]=useState(false);
   const { darkTheme } = useContext(ThemeContext);
   const { curruser } = useContext(auth);
   const userid = parseInt(useLocation().pathname.split("/")[2]);
@@ -106,7 +108,7 @@ const Profile = () => {
               {isLoading ? (
                 "Loading...."
               ) : userid === curruser.id ? (
-                <button className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-medium hover:opacity-90 transition-all shadow-md hover:shadow-lg">
+                <button onClick={()=>{setopenupdate(true)}} className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-medium hover:opacity-90 transition-all shadow-md hover:shadow-lg">
                   Update
                 </button>
               ) : (
@@ -151,6 +153,7 @@ const Profile = () => {
         <Share />
         <Posts userid={userid}/>
       </div>
+      {openupdate && <Update setopenupdate={setopenupdate}/>}
     </div>
   );
 };

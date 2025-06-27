@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AddHomeIcon from '@mui/icons-material/AddHome';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import GridViewIcon from '@mui/icons-material/GridView';
@@ -9,29 +9,56 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useContext, useState, useRef, useEffect } from 'react';
 import { ThemeContext } from '../../App';
 import { auth } from '../../Auth';
+import { makereq } from '../../axios';
 
 const Navbar = () => {
   const { darkTheme, toggleTheme } = useContext(ThemeContext);
   const { curruser } = useContext(auth);
+  const navigate = useNavigate();
 
-  const suggestionsList = ["Amber", "Anastashiya", "Albert", "Amala", "Adithya", "Abi"];
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   const searchRef = useRef(null);
 
-  const filteredSuggestions = suggestionsList
-    .filter(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
-    .slice(0, 5);
+  const searchUsers = async (query) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
 
-  const handleChange = (e) => {
-    setSearchTerm(e.target.value);
-    setShowSuggestions(true);
+    setIsSearching(true);
+    try {
+      const response = await makereq.get(`/users/search?q=${encodeURIComponent(query)}`);
+      setSearchResults(response.data);
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
-  const handleSelect = (s) => {
-    setSearchTerm(s);
+  const handleChange = async (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setShowSuggestions(true);
+    
+    // Debounce search
+    if (value.trim()) {
+      await searchUsers(value);
+    } else {
+      setSearchResults([]);
+    }
+  };
+
+  const handleSelectUser = (user) => {
+    setSearchTerm('');
     setShowSuggestions(false);
+    setSearchResults([]);
+    navigate(`/profile/${user.id}`);
   };
 
   useEffect(() => {
@@ -63,28 +90,35 @@ const Navbar = () => {
           <SearchIcon className={`${darkTheme ? 'text-gray-300' : 'text-gray-500'} mr-2`} />
           <input 
             type="text" 
-            placeholder="Search here...🧐" 
+            placeholder="Search users...🧐" 
             className={`border-none bg-transparent outline-none w-48 text-sm ${darkTheme ? 'text-white placeholder-gray-400' : 'text-gray-800'}`}
             value={searchTerm}
             onChange={handleChange}
             onFocus={() => setShowSuggestions(true)}
           />
-          {/* Suggestions dropdown */}
+          {/* Search results dropdown */}
           {showSuggestions && (
-            <ul className={`absolute top-full left-0 w-full bg-white shadow-lg rounded mt-2 z-10 text-sm ${darkTheme ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
-              {filteredSuggestions.length > 0 ? (
-                filteredSuggestions.map((s, i) => (
+            <ul className={`absolute top-full left-0 w-full shadow-lg rounded mt-2 z-10 text-sm max-h-60 overflow-y-auto ${darkTheme ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
+              {isSearching ? (
+                <li className="px-4 py-2 text-gray-400">Searching...</li>
+              ) : searchResults.length > 0 ? (
+                searchResults.map((user) => (
                   <li
-                    key={i}
-                    onClick={() => handleSelect(s)}
-                    className="px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer"
+                    key={user.id}
+                    onClick={() => handleSelectUser(user)}
+                    className={`px-4 py-3 cursor-pointer flex items-center gap-3 ${darkTheme ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
                   >
-                    {s}
+                    <img 
+                      src={user.profile_pic || '/default-profile.png'} 
+                      alt={user.username}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                    <span className="font-medium">{user.username}</span>
                   </li>
                 ))
-              ) : (
-                <li className="px-4 py-2 text-gray-400">No suggestions</li>
-              )}
+              ) : searchTerm.trim() && !isSearching ? (
+                <li className="px-4 py-2 text-gray-400">No users found</li>
+              ) : null}
             </ul>
           )}
         </div>
