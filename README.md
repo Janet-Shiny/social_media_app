@@ -24,35 +24,3 @@ A lightweight, responsive, full-stack **mock social media app** built with **Rea
 | Backend     | Node.js, Express              |
 | Database    | MySQL                         |
 | Others      | Axios, JWT, bcrypt            |
-
----
-
-## 📸 Screenshots
-
-### 🔐 Login Page
-![Login Page](./screenshots/login.png)
-
----
-
-### 👤 User Profile (Vincent)
-![Vincent Profile](./screenshots/profile.png)
-
----
-
-### 👥 Viewing Another Profile (Leema)
-![Leema Profile](./screenshots/profile_leema.png)
-
----
-
-### 🏛️ Post by Vincent
-![Post by Vincent](./screenshots/post1.png)
-
----
-
-### 🍁 Post by Leema
-![Post by Leema](./screenshots/post2.png)
-
----
-
-
-
